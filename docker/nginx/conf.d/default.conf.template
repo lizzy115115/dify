@@ -3,14 +3,18 @@
 server {
     listen ${NGINX_PORT};
     server_name ${NGINX_SERVER_NAME};
+    # Re-resolve Docker service names when upstream containers restart (avoids stale IP / 502).
+    resolver 127.0.0.11 valid=10s ipv6=off;
 
     location /console/api {
-      proxy_pass http://api:5001;
+      set $dify_api_backend api:5001;
+      proxy_pass http://$dify_api_backend;
       include proxy.conf;
     }
 
     location /api {
-      proxy_pass http://api:5001;
+      set $dify_api_backend api:5001;
+      proxy_pass http://$dify_api_backend;
       include proxy.conf;
     }
 
@@ -25,17 +29,20 @@ server {
     }
 
     location /v1 {
-      proxy_pass http://api:5001;
+      set $dify_api_backend api:5001;
+      proxy_pass http://$dify_api_backend;
       include proxy.conf;
     }
 
     location /openapi {
-      proxy_pass http://api:5001;
+      set $dify_api_backend api:5001;
+      proxy_pass http://$dify_api_backend;
       include proxy.conf;
     }
 
     location /files {
-      proxy_pass http://api:5001;
+      set $dify_api_backend api:5001;
+      proxy_pass http://$dify_api_backend;
       include proxy.conf;
     }
 
@@ -56,12 +63,14 @@ server {
     }
 
     location /mcp {
-      proxy_pass http://api:5001;
+      set $dify_api_backend api:5001;
+      proxy_pass http://$dify_api_backend;
       include proxy.conf;
     }
 
     location /triggers {
-      proxy_pass http://api:5001;
+      set $dify_api_backend api:5001;
+      proxy_pass http://$dify_api_backend;
       include proxy.conf;
     }
     

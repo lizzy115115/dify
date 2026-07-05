@@ -171,6 +171,9 @@ docker-legacy/volumes/pgvectors/data/*
 docker-legacy/volumes/pgvector/data/*
 
 docker/volumes/app/storage/*
+docker/volumes/sandbox/logs/**/*
+!docker/volumes/sandbox/logs/**/.gitkeep
+!docker/volumes/sandbox/logs/.gitignore
 docker/volumes/certbot/*
 docker/volumes/db/data/*
 docker/volumes/redis/data/*
