@@ -1,0 +1,73 @@
+{
+  "api_base_url": "http://localhost/v1",
+  "dataset_api_key": "dataset-xxxxxxxxxxxxxxxx",
+  "_comment_models": "Replace with models configured in Dify Settings → Model Provider. Example: Tongyi multimodal-embedding-v1 + qwen3-rerank, or Xinference bge-m3 + bge-reranker-v2-m3.",
+  "embedding_model": "multimodal-embedding-v1",
+  "embedding_model_provider": "langgenius/tongyi/tongyi",
+  "reranking_model": "qwen3-rerank",
+  "reranking_provider": "langgenius/tongyi/tongyi",
+  "llm_model": "qwen-plus",
+  "llm_provider": "langgenius/tongyi/tongyi",
+  "console_api_url": "http://localhost/console/api",
+  "console_email": "admin@example.com",
+  "console_password": "your-admin-password",
+  "retrieval": {
+    "search_method": "hybrid_search",
+    "top_k": 15,
+    "score_threshold_enabled": true,
+    "score_threshold": 0.52,
+    "reranking_enable": true,
+    "reranking_mode": "reranking_model"
+  },
+  "chunking": {
+    "mode": "custom",
+    "max_tokens": 650,
+    "chunk_overlap": 120,
+    "separator": "\n\n"
+  },
+  "metadata_fields": [
+    { "type": "string", "name": "doc_kind" },
+    { "type": "time", "name": "effective_date" },
+    { "type": "string", "name": "ticker" },
+    { "type": "string", "name": "industry" },
+    { "type": "number", "name": "is_valid" }
+  ],
+  "datasets": [
+    {
+      "key": "macro",
+      "name": "宏观策略库",
+      "description": "华东投研-宏观与策略研报",
+      "permission": "all_team_members"
+    },
+    {
+      "key": "industry",
+      "name": "行业研究库",
+      "description": "华东投研-行业研究研报",
+      "permission": "all_team_members"
+    },
+    {
+      "key": "equity",
+      "name": "个股研报库",
+      "description": "华东投研-个股深度研报",
+      "permission": "all_team_members"
+    },
+    {
+      "key": "filings",
+      "name": "财报公告库",
+      "description": "华东投研-财报与公告",
+      "permission": "all_team_members"
+    },
+    {
+      "key": "regulation",
+      "name": "监管政策库",
+      "description": "华东投研-监管与政策文件",
+      "permission": "all_team_members"
+    },
+    {
+      "key": "internal",
+      "name": "内部研究库",
+      "description": "华东投研-内部评级（partial_members）",
+      "permission": "partial_members"
+    }
+  ]
+}

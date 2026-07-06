@@ -1,0 +1,10 @@
+*
+!.gitignore
+!api/
+!worker/
+!worker_beat/
+!api_websocket/
+!api/.gitkeep
+!worker/.gitkeep
+!worker_beat/.gitkeep
+!api_websocket/.gitkeep

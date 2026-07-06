@@ -1,0 +1,311 @@
+[
+  {
+    "file": "macro/2026Q1_中国货币政策执行报告.pdf",
+    "meta": {
+      "doc_kind": "macro_report",
+      "effective_date": "2026-05-08",
+      "industry": "宏观",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "macro/2026_全球宏观展望_KKR.pdf",
+    "meta": {
+      "doc_kind": "macro_report",
+      "effective_date": "2026-01-22",
+      "industry": "宏观",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "macro/2026_中国宏观经济中期展望_浦银国际.pdf",
+    "meta": {
+      "doc_kind": "macro_report",
+      "effective_date": "2026-06-01",
+      "industry": "宏观",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "industry/2026_国产算力趋势不可逆_东方证券.pdf",
+    "meta": {
+      "doc_kind": "industry_report",
+      "effective_date": "2026-05-09",
+      "industry": "国产AI算力",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "industry/2026_英伟达GTC2026_AI基础设施_行业点评.pdf",
+    "meta": {
+      "doc_kind": "industry_report",
+      "effective_date": "2026-03-23",
+      "industry": "AI算力/GPU",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "industry/2026_光互联CPO行业深度_通信.pdf",
+    "meta": {
+      "doc_kind": "industry_report",
+      "effective_date": "2026-06-07",
+      "industry": "光模块/CPO",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "industry/2026_光模块行业CPO趋势_IDC.pdf",
+    "meta": {
+      "doc_kind": "industry_report",
+      "effective_date": "2026-01-01",
+      "industry": "光模块/CPO",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "industry/2026_中国白酒市场中期研究报告_毕马威.pdf",
+    "meta": {
+      "doc_kind": "industry_report",
+      "effective_date": "2026-06-01",
+      "industry": "白酒",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "equity/NVDA_英伟达_FY2026Q4财报点评_华龙证券.pdf",
+    "meta": {
+      "doc_kind": "equity_report",
+      "effective_date": "2026-02-27",
+      "ticker": "NVDA",
+      "industry": "AI算力/GPU",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "equity/NVDA_英伟达_FY27Q1业绩点评_信达证券.pdf",
+    "meta": {
+      "doc_kind": "equity_report",
+      "effective_date": "2026-05-25",
+      "ticker": "NVDA",
+      "industry": "AI算力/GPU",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "equity/688256_寒武纪_2026Q1更新报告_第一上海.pdf",
+    "meta": {
+      "doc_kind": "equity_report",
+      "effective_date": "2026-04-27",
+      "ticker": "688256",
+      "industry": "国产AI芯片",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "equity/300502_新易盛_2025年报点评_开源证券.pdf",
+    "meta": {
+      "doc_kind": "equity_report",
+      "effective_date": "2026-04-26",
+      "ticker": "300502",
+      "industry": "光模块/CPO",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "equity/300502_新易盛_2026Q1快报点评_山西证券.pdf",
+    "meta": {
+      "doc_kind": "equity_report",
+      "effective_date": "2026-05-27",
+      "ticker": "300502",
+      "industry": "光模块/CPO",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "equity/600519_贵州茅台_2026Q1财报点评_国信证券.pdf",
+    "meta": {
+      "doc_kind": "equity_report",
+      "effective_date": "2026-04-27",
+      "ticker": "600519",
+      "industry": "白酒",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "equity/600519_贵州茅台_淡季提价点评_中银证券.pdf",
+    "meta": {
+      "doc_kind": "equity_report",
+      "effective_date": "2026-04-02",
+      "ticker": "600519",
+      "industry": "白酒",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "filings/NVDA_英伟达_FY2026_10K.pdf",
+    "meta": {
+      "doc_kind": "filing",
+      "effective_date": "2026-02-25",
+      "ticker": "NVDA",
+      "industry": "AI算力/GPU",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "filings/688256_寒武纪_2025年年度报告.pdf",
+    "meta": {
+      "doc_kind": "filing",
+      "effective_date": "2026-03-13",
+      "ticker": "688256",
+      "industry": "国产AI芯片",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "filings/688256_寒武纪_2026年第一季度报告.pdf",
+    "meta": {
+      "doc_kind": "filing",
+      "effective_date": "2026-04-28",
+      "ticker": "688256",
+      "industry": "国产AI芯片",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "filings/688256_寒武纪_2026Q1资产减值准备公告.pdf",
+    "meta": {
+      "doc_kind": "filing",
+      "effective_date": "2026-04-28",
+      "ticker": "688256",
+      "industry": "国产AI芯片",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "filings/300502_新易盛_2025年年度报告.pdf",
+    "meta": {
+      "doc_kind": "filing",
+      "effective_date": "2026-04-24",
+      "ticker": "300502",
+      "industry": "光模块/CPO",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "filings/300502_新易盛_2025年年度报告摘要.pdf",
+    "meta": {
+      "doc_kind": "filing",
+      "effective_date": "2026-04-24",
+      "ticker": "300502",
+      "industry": "光模块/CPO",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "filings/300502_新易盛_2026年第一季度报告.pdf",
+    "meta": {
+      "doc_kind": "filing",
+      "effective_date": "2026-04-24",
+      "ticker": "300502",
+      "industry": "光模块/CPO",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "filings/300502_新易盛_2025年度业绩说明会记录.pdf",
+    "meta": {
+      "doc_kind": "filing",
+      "effective_date": "2026-04-29",
+      "ticker": "300502",
+      "industry": "光模块/CPO",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "filings/600519_贵州茅台_2025年年度报告.pdf",
+    "meta": {
+      "doc_kind": "filing",
+      "effective_date": "2026-04-17",
+      "ticker": "600519",
+      "industry": "白酒",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "filings/600519_贵州茅台_2025年年度报告摘要.pdf",
+    "meta": {
+      "doc_kind": "filing",
+      "effective_date": "2026-04-17",
+      "ticker": "600519",
+      "industry": "白酒",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "filings/600519_贵州茅台_2026年第一季度报告.pdf",
+    "meta": {
+      "doc_kind": "filing",
+      "effective_date": "2026-04-24",
+      "ticker": "600519",
+      "industry": "白酒",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "regulation/工信部75号_人工智能科技伦理审查与服务办法.pdf",
+    "meta": {
+      "doc_kind": "regulation",
+      "effective_date": "2026-04-02",
+      "industry": "AI监管",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "regulation/2026_中国人工智能监管法规全景解析_汉坤.pdf",
+    "meta": {
+      "doc_kind": "regulation",
+      "effective_date": "2026-04-29",
+      "industry": "AI监管",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "internal/2026_内部_AI算力产业链配置策略_华东投研.pdf",
+    "meta": {
+      "doc_kind": "internal_report",
+      "effective_date": "2026-06-15",
+      "industry": "AI算力",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "internal/2026_内部_寒武纪深度跟踪_华东投研.pdf",
+    "meta": {
+      "doc_kind": "internal_report",
+      "effective_date": "2026-05-06",
+      "ticker": "688256",
+      "industry": "国产AI芯片",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "internal/2026_内部_新易盛光模块景气跟踪_华东投研.pdf",
+    "meta": {
+      "doc_kind": "internal_report",
+      "effective_date": "2026-05-28",
+      "ticker": "300502",
+      "industry": "光模块/CPO",
+      "is_valid": 1
+    }
+  },
+  {
+    "file": "internal/2026_内部_白酒板块淡季策略_华东投研.pdf",
+    "meta": {
+      "doc_kind": "internal_report",
+      "effective_date": "2026-04-10",
+      "ticker": "600519",
+      "industry": "白酒",
+      "is_valid": 1
+    }
+  }
+]

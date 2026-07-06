@@ -1,0 +1,737 @@
+app:
+  name: 投研知识库智能体
+  description: 生产级投研 RAG：参数提取 → 查询改写 → 意图路由 → 分库 hybrid/Rerank + is_valid 元数据过滤 → 引用式回答
+  icon: 📊
+  icon_background: '#E4F2FF'
+  mode: workflow
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.4.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      enabled: false
+    opening_statement: |-
+      华东投研知识库智能体（Milvus hybrid + Rerank + 元数据过滤）。
+      回答仅含三章：结论摘要、依据与数据、元数据说明；资料不足时将直接说明无依据。
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions:
+    - 2026年工信部75号人工智能科技伦理审查办法的核心要求是什么？
+    - 贵州茅台600519 2026Q1报告里的营收和归母净利润是多少？
+    - 贵州茅台600519 2025年年度报告摘要披露的关键财务指标有哪些？
+    - 寒武纪688256 2026Q1季报营收与毛利率是多少？
+    - 对比600519、300502、688256三家公司2026Q1业绩增速
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+  graph:
+    nodes:
+    - id: '2000000000001'
+      type: custom
+      width: 244
+      height: 90
+      position:
+        x: 30
+        y: 300
+      positionAbsolute:
+        x: 30
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      data:
+        title: 用户输入
+        type: start
+        desc: ''
+        selected: false
+        variables:
+        - label: 投研问题
+          variable: query
+          type: paragraph
+          required: true
+          max_length: 2000
+          options: []
+    - id: '2000000000002'
+      type: custom
+      width: 244
+      height: 120
+      position:
+        x: 300
+        y: 300
+      positionAbsolute:
+        x: 300
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      data:
+        title: 参数提取
+        type: parameter-extractor
+        desc: 提取 ticker / 年份 / 报告期 / 行业
+        selected: false
+        query:
+        - '2000000000001'
+        - query
+        reasoning_mode: prompt
+        instruction: |-
+          从投研问题中提取结构化参数。无则留空字符串。
+          - ticker: 证券代码（A 股 6 位数字或 NVDA 等）
+          - fiscal_year: 会计年度或自然年（如 2025、2026）
+          - report_period: 报告期描述（2025年报、2026Q1、FY2026 10-K）
+          - industry_hint: 行业关键词（白酒、光模块、AI算力等）
+        model:
+          provider: langgenius/tongyi/tongyi
+          name: qwen-plus
+          mode: chat
+          completion_params:
+            temperature: 0.1
+        parameters:
+        - name: ticker
+          type: string
+          description: 证券代码，如 600519、688256、NVDA
+          required: false
+        - name: fiscal_year
+          type: string
+          description: 会计年度或自然年，如 2025、2026
+          required: false
+        - name: report_period
+          type: string
+          description: 报告期，如 2025年报、2026Q1、FY2026 10-K
+          required: false
+        - name: industry_hint
+          type: string
+          description: 行业关键词
+          required: false
+        vision:
+          enabled: false
+    - id: '2000000000003'
+      type: custom
+      width: 244
+      height: 90
+      position:
+        x: 570
+        y: 300
+      positionAbsolute:
+        x: 570
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      data:
+        title: 查询改写
+        type: llm
+        desc: 补全机构、报告期、指标，写入 ticker/年份
+        selected: false
+        model:
+          provider: langgenius/tongyi/tongyi
+          name: qwen-plus
+          mode: chat
+          completion_params:
+            temperature: 0.2
+        prompt_template:
+        - role: system
+          text: |-
+            你是华东投研中心的「检索查询改写」模块，服务于 hybrid + Rerank 多库知识检索。
+
+            ## 任务
+            将用户自然语言问题改写为适合向量+BM25混合检索的完整 query，并保留结构化检索线索。
+
+            ## 元数据字段（入库时已写入，检索结果 segment 会携带）
+            | 字段 | 含义 | 年份/版本如何区分 |
+            |------|------|-------------------|
+            | doc_kind | macro_report / industry_report / equity_report / filing / regulation / internal_report | 区分宏观、行业、个股、财报、监管 |
+            | effective_date | 政策生效日或财报/公告**披露日**（ISO 日期） | **不是会计年度本身**；2025 年报常在 2026 年披露，需结合文件名与 report_period |
+            | ticker | 证券代码（600519、688256、300502、NVDA 等） | 同一公司不同报告靠 effective_date + 报告期区分 |
+            | industry | 行业标签 | 辅助行业库检索 |
+            | is_valid | 1=现行有效，0=已废止 | 工作流检索层已强制 is_valid=1，禁止引用废止政策 |
+
+            ## 改写规则
+            1. 补全公司全称、证券代码 ticker、报告期（如 2025 年报 / 2026Q1 / FY2026 10-K）
+            2. 保留原文数字、文号、政策名称、指标名（营收、净利润、资本开支等）
+            3. 若参数提取节点给出 ticker / fiscal_year / report_period，必须写入改写 query
+            4. 监管类问题保留「办法/通知/文号/生效日期」等关键词
+            5. 只输出一行改写后的 query，不要解释、不要 Markdown
+        - role: user
+          text: |-
+            【用户原问】{{#2000000000001.query#}}
+
+            【参数提取】
+            - ticker: {{#2000000000002.ticker#}}
+            - fiscal_year: {{#2000000000002.fiscal_year#}}
+            - report_period: {{#2000000000002.report_period#}}
+            - industry_hint: {{#2000000000002.industry_hint#}}
+
+            请输出改写 query。
+        context:
+          enabled: false
+          variable_selector: []
+        variables: []
+        vision:
+          enabled: false
+    - id: '2000000000004'
+      type: custom
+      width: 244
+      height: 180
+      position:
+        x: 840
+        y: 300
+      positionAbsolute:
+        x: 840
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      data:
+        title: 意图路由
+        type: question-classifier
+        desc: 按意图路由至子库检索，降低 P99
+        selected: false
+        query_variable_selector:
+        - '2000000000003'
+        - text
+        instruction: |-
+          将用户问题路由到最合适的一个类别：
+          1 监管政策 — 法规、办法、伦理审查、合规义务
+          2 财报公告 — 年报、季报、10-K、业绩快报、公告
+          3 个股研报 — 券商点评、目标价、投资评级
+          4 宏观行业 — 宏观策略、行业深度、产业趋势
+          5 综合投研 — 跨库对比、多标的、无法单一归类
+        classes:
+        - id: '1'
+          name: 监管政策问询
+          label: 监管政策
+        - id: '2'
+          name: 财报公告问询
+          label: 财报公告
+        - id: '3'
+          name: 个股研报问询
+          label: 个股研报
+        - id: '4'
+          name: 宏观行业问询
+          label: 宏观行业
+        - id: '5'
+          name: 综合投研问询
+          label: 综合投研
+        _targetBranches:
+        - id: '1'
+          name: 监管政策
+        - id: '2'
+          name: 财报公告
+        - id: '3'
+          name: 个股研报
+        - id: '4'
+          name: 宏观行业
+        - id: '5'
+          name: 综合投研
+        model:
+          provider: langgenius/tongyi/tongyi
+          name: qwen-plus
+          mode: chat
+          completion_params:
+            temperature: 0.2
+        vision:
+          enabled: false
+    - id: '2000000000005'
+      type: custom
+      width: 244
+      height: 90
+      position:
+        x: 1110
+        y: 80
+      positionAbsolute:
+        x: 1110
+        y: 80
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      data:
+        title: 检索-监管库
+        type: knowledge-retrieval
+        desc: hybrid_search + Rerank + is_valid=1
+        selected: false
+        dataset_ids:
+        - c2776497-997a-4d92-a2d6-7e74d9c53a3c
+        retrieval_mode: multiple
+        query_variable_selector:
+        - '2000000000003'
+        - text
+        metadata_filtering_mode: manual
+        metadata_filtering_conditions:
+          logical_operator: and
+          conditions:
+          - name: is_valid
+            comparison_operator: '='
+            value: 1
+        multiple_retrieval_config:
+          top_k: 15
+          score_threshold: 0.52
+          reranking_enable: true
+          reranking_mode: reranking_model
+          reranking_model:
+            model: qwen3-rerank
+            provider: langgenius/tongyi/tongyi
+    - id: '2000000000006'
+      type: custom
+      width: 244
+      height: 90
+      position:
+        x: 1110
+        y: 220
+      positionAbsolute:
+        x: 1110
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      data:
+        title: 检索-财报库
+        type: knowledge-retrieval
+        desc: hybrid_search + Rerank + is_valid=1
+        selected: false
+        dataset_ids:
+        - 64720501-426e-4a45-89f1-acf32eda4701
+        retrieval_mode: multiple
+        query_variable_selector:
+        - '2000000000003'
+        - text
+        metadata_filtering_mode: manual
+        metadata_filtering_conditions:
+          logical_operator: and
+          conditions:
+          - name: is_valid
+            comparison_operator: '='
+            value: 1
+        multiple_retrieval_config:
+          top_k: 15
+          score_threshold: 0.52
+          reranking_enable: true
+          reranking_mode: reranking_model
+          reranking_model:
+            model: qwen3-rerank
+            provider: langgenius/tongyi/tongyi
+    - id: '2000000000007'
+      type: custom
+      width: 244
+      height: 90
+      position:
+        x: 1110
+        y: 360
+      positionAbsolute:
+        x: 1110
+        y: 360
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      data:
+        title: 检索-个股库
+        type: knowledge-retrieval
+        desc: hybrid_search + Rerank + is_valid=1
+        selected: false
+        dataset_ids:
+        - c739e361-eacc-4712-bdaf-3f7d914fa05b
+        retrieval_mode: multiple
+        query_variable_selector:
+        - '2000000000003'
+        - text
+        metadata_filtering_mode: manual
+        metadata_filtering_conditions:
+          logical_operator: and
+          conditions:
+          - name: is_valid
+            comparison_operator: '='
+            value: 1
+        multiple_retrieval_config:
+          top_k: 15
+          score_threshold: 0.52
+          reranking_enable: true
+          reranking_mode: reranking_model
+          reranking_model:
+            model: qwen3-rerank
+            provider: langgenius/tongyi/tongyi
+    - id: '2000000000008'
+      type: custom
+      width: 244
+      height: 90
+      position:
+        x: 1110
+        y: 500
+      positionAbsolute:
+        x: 1110
+        y: 500
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      data:
+        title: 检索-宏观行业
+        type: knowledge-retrieval
+        desc: hybrid_search + Rerank + is_valid=1
+        selected: false
+        dataset_ids:
+        - 44a2401e-3648-4f9f-aa5c-9900e7981b8b
+        - d5b30c49-5d29-449d-9510-e4a37280f551
+        retrieval_mode: multiple
+        query_variable_selector:
+        - '2000000000003'
+        - text
+        metadata_filtering_mode: manual
+        metadata_filtering_conditions:
+          logical_operator: and
+          conditions:
+          - name: is_valid
+            comparison_operator: '='
+            value: 1
+        multiple_retrieval_config:
+          top_k: 15
+          score_threshold: 0.52
+          reranking_enable: true
+          reranking_mode: reranking_model
+          reranking_model:
+            model: qwen3-rerank
+            provider: langgenius/tongyi/tongyi
+    - id: '2000000000009'
+      type: custom
+      width: 244
+      height: 90
+      position:
+        x: 1110
+        y: 640
+      positionAbsolute:
+        x: 1110
+        y: 640
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      data:
+        title: 检索-综合五库
+        type: knowledge-retrieval
+        desc: hybrid_search + Rerank + is_valid=1
+        selected: false
+        dataset_ids:
+        - 44a2401e-3648-4f9f-aa5c-9900e7981b8b
+        - d5b30c49-5d29-449d-9510-e4a37280f551
+        - c739e361-eacc-4712-bdaf-3f7d914fa05b
+        - 64720501-426e-4a45-89f1-acf32eda4701
+        - c2776497-997a-4d92-a2d6-7e74d9c53a3c
+        retrieval_mode: multiple
+        query_variable_selector:
+        - '2000000000003'
+        - text
+        metadata_filtering_mode: manual
+        metadata_filtering_conditions:
+          logical_operator: and
+          conditions:
+          - name: is_valid
+            comparison_operator: '='
+            value: 1
+        multiple_retrieval_config:
+          top_k: 15
+          score_threshold: 0.52
+          reranking_enable: true
+          reranking_mode: reranking_model
+          reranking_model:
+            model: qwen3-rerank
+            provider: langgenius/tongyi/tongyi
+    - id: '2000000000010'
+      type: custom
+      width: 244
+      height: 160
+      position:
+        x: 1380
+        y: 360
+      positionAbsolute:
+        x: 1380
+        y: 360
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      data:
+        title: 检索结果汇聚
+        type: variable-aggregator
+        desc: 合并五路检索结果（仅命中分支有值）
+        selected: false
+        output_type: array[object]
+        advanced_settings:
+          group_enabled: false
+          groups: []
+        variables:
+        - - '2000000000005'
+          - result
+        - - '2000000000006'
+          - result
+        - - '2000000000007'
+          - result
+        - - '2000000000008'
+          - result
+        - - '2000000000009'
+          - result
+    - id: '2000000000011'
+      type: custom
+      width: 244
+      height: 120
+      position:
+        x: 1650
+        y: 360
+      positionAbsolute:
+        x: 1650
+        y: 360
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      data:
+        title: 投研回答生成
+        type: llm
+        desc: 强制 segment_id 引用 + 元数据年份核对
+        selected: false
+        model:
+          provider: langgenius/tongyi/tongyi
+          name: qwen-plus
+          mode: chat
+          completion_params:
+            temperature: 0.3
+        prompt_template:
+        - role: system
+          text: |-
+            你是华东投研中心「投研知识库智能体」——仅依据下方【检索片段】作答。
+
+            ## 硬性规则
+            1. 【检索片段】非空且与问题相关时，**必须据此回答**，不得声称「无依据」
+            2. 《YYYY年年度报告摘要》即 YYYY 会计年度；effective_date 为披露日（可在 YYYY+1 年）
+            3. 数字、日期必须与片段一致，禁止臆造
+            4. 引用格式：`[segment_id:<id>]`；若片段未给出 id，用 `[文档:<文件名>]`，禁止编造 id
+            5. 仅当【检索片段】为空或与问题完全无关时，结论摘要写：「当前知识库未找到足够依据，无法回答该问题。」
+
+            ## 输出格式（仅三章，禁止其它内容）
+            ### 结论摘要
+            ### 依据与数据
+            ### 元数据说明
+        - role: user
+          text: |-
+            【检索片段】
+            {{#context#}}
+
+            【用户原问】{{#2000000000001.query#}}
+            【改写 query】{{#2000000000003.text#}}
+            【提取参数】ticker={{#2000000000002.ticker#}} fiscal_year={{#2000000000002.fiscal_year#}} report_period={{#2000000000002.report_period#}}
+
+            请仅依据【检索片段】回答，按三章格式输出。
+        context:
+          enabled: true
+          variable_selector:
+          - '2000000000010'
+          - output
+        variables: []
+        vision:
+          enabled: false
+    - id: '2000000000013'
+      type: custom
+      width: 244
+      height: 90
+      position:
+        x: 1920
+        y: 360
+      positionAbsolute:
+        x: 1920
+        y: 360
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      data:
+        title: 输出
+        type: end
+        desc: ''
+        selected: false
+        outputs:
+        - variable: answer
+          value_selector:
+          - '2000000000011'
+          - text
+          value_type: string
+        - variable: rewrite_query
+          value_selector:
+          - '2000000000003'
+          - text
+          value_type: string
+        - variable: extracted_ticker
+          value_selector:
+          - '2000000000002'
+          - ticker
+          value_type: string
+    edges:
+    - id: 2000000000001-source-2000000000002-target
+      source: '2000000000001'
+      target: '2000000000002'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: parameter-extractor
+    - id: 2000000000002-source-2000000000003-target
+      source: '2000000000002'
+      target: '2000000000003'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: parameter-extractor
+        targetType: llm
+    - id: 2000000000003-source-2000000000004-target
+      source: '2000000000003'
+      target: '2000000000004'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: question-classifier
+    - id: 2000000000004-1-2000000000005-target
+      source: '2000000000004'
+      target: '2000000000005'
+      sourceHandle: '1'
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: knowledge-retrieval
+    - id: 2000000000004-2-2000000000006-target
+      source: '2000000000004'
+      target: '2000000000006'
+      sourceHandle: '2'
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: knowledge-retrieval
+    - id: 2000000000004-3-2000000000007-target
+      source: '2000000000004'
+      target: '2000000000007'
+      sourceHandle: '3'
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: knowledge-retrieval
+    - id: 2000000000004-4-2000000000008-target
+      source: '2000000000004'
+      target: '2000000000008'
+      sourceHandle: '4'
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: knowledge-retrieval
+    - id: 2000000000004-5-2000000000009-target
+      source: '2000000000004'
+      target: '2000000000009'
+      sourceHandle: '5'
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: knowledge-retrieval
+    - id: 2000000000005-source-2000000000010-target
+      source: '2000000000005'
+      target: '2000000000010'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: knowledge-retrieval
+        targetType: variable-aggregator
+    - id: 2000000000006-source-2000000000010-target
+      source: '2000000000006'
+      target: '2000000000010'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: knowledge-retrieval
+        targetType: variable-aggregator
+    - id: 2000000000007-source-2000000000010-target
+      source: '2000000000007'
+      target: '2000000000010'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: knowledge-retrieval
+        targetType: variable-aggregator
+    - id: 2000000000008-source-2000000000010-target
+      source: '2000000000008'
+      target: '2000000000010'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: knowledge-retrieval
+        targetType: variable-aggregator
+    - id: 2000000000009-source-2000000000010-target
+      source: '2000000000009'
+      target: '2000000000010'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: knowledge-retrieval
+        targetType: variable-aggregator
+    - id: 2000000000010-source-2000000000011-target
+      source: '2000000000010'
+      target: '2000000000011'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: variable-aggregator
+        targetType: llm
+    - id: 2000000000011-source-2000000000013-target
+      source: '2000000000011'
+      target: '2000000000013'
+      sourceHandle: source
+      targetHandle: target
+      type: custom
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: end
+    viewport:
+      x: 0
+      y: 0
+      zoom: 0.55

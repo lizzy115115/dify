@@ -1,0 +1,14 @@
+[
+  {"dataset": "regulation", "query": "工信部75号 人工智能科技伦理审查 服务提供者 义务"},
+  {"dataset": "filings", "query": "贵州茅台 600519 2026年第一季度 营收 净利润"},
+  {"dataset": "filings", "query": "贵州茅台 600519 2025年年度报告摘要 营收 归母净利润"},
+  {"dataset": "filings", "query": "贵州茅台 600519 2025年年度报告 营收 净利润"},
+  {"dataset": "equity", "query": "新易盛 300502 2026Q1 业绩点评 目标价"},
+  {"dataset": "filings", "query": "寒武纪 688256 2026年第一季度 营收 毛利率"},
+  {"dataset": "macro", "query": "2026Q1 中国货币政策执行报告 流动性 信贷"},
+  {"dataset": "industry", "query": "光模块 CPO 行业趋势 竞争格局"},
+  {"dataset": "industry", "query": "国产算力趋势不可逆 东方证券 投资逻辑"},
+  {"dataset": "regulation", "query": "人工智能监管法规 训练数据合规 算法备案"},
+  {"dataset": "filings", "query": "600519 300502 688256 2026Q1 营收"},
+  {"dataset": "filings", "query": "新易盛 300502 2025年年度报告摘要 营收"}
+]
